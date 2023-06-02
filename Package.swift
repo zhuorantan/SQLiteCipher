@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
   name: "SQLiteCipher",
   platforms: [
-    .iOS(.v16),
+    .iOS(.v11),
   ],
   products: [
     .library(name: "SQLiteCipher", targets: ["SQLite", "SQLCipher"]),
@@ -15,13 +15,13 @@ let package = Package(
     .binaryTarget(
       name: "SQLite",
       url: "https://github.com/zhuorantan/SQLiteCipher/releases/download/0.14.1/SQLite.xcframework.zip",
-      checksum: "f31a7715e76f739e8c730f694ba13d2a21991b9df529b0580c0f0a74019d5144"
+      checksum: "1ad444ffe3f05f86941590a204394f6206c9de4b5e611bc407385886289d7bdd"
     ),
 
     .binaryTarget(
       name: "SQLCipher",
       url: "https://github.com/zhuorantan/SQLiteCipher/releases/download/0.14.1/SQLCipher.xcframework.zip",
-      checksum: "45bbb3701019ea6c790145447ca0ddcc678a2c7b1221ab4029b7f11cc74b8350"
+      checksum: "7d5128d6a89346fc40fa3c9f7854900a16b8db49b05e8f48ffebb0c1b38ab7cc"
     ),
   ]
 )

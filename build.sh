@@ -19,7 +19,6 @@ platform :ios, '16.0'
 pod 'SQLite.swift/SQLCipher', '$VERSION'
 EOF
 
-bundle install
 bundle exec pod install
 
 xcodebuild archive \
@@ -28,7 +27,9 @@ xcodebuild archive \
   -destination "generic/platform=iOS" \
   -archivePath "archives/SQLiteCipher-iOS" \
   BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
-  SKIP_INSTALL=NO
+  SKIP_INSTALL=NO \
+  OTHER_SWIFT_FLAGS='$(inherited) -DSQLITE_SWIFT_SQLCIPHER' \
+  GCC_PREPROCESSOR_DEFINITIONS='$(inherited) SQLITE_HAS_CODEC=1 SQLITE_SWIFT_SQLCIPHER=1'
 
 xcodebuild archive \
   -project ./Pods/Pods.xcodeproj \
@@ -36,7 +37,9 @@ xcodebuild archive \
   -destination "generic/platform=iOS Simulator" \
   -archivePath "archives/SQLiteCipher-iOS_Simulator" \
   BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
-  SKIP_INSTALL=NO
+  SKIP_INSTALL=NO \
+  OTHER_SWIFT_FLAGS='$(inherited) -DSQLITE_SWIFT_SQLCIPHER' \
+  GCC_PREPROCESSOR_DEFINITIONS='$(inherited) SQLITE_HAS_CODEC=1 SQLITE_SWIFT_SQLCIPHER=1'
 
 xcodebuild -create-xcframework \
   -archive archives/SQLiteCipher-iOS.xcarchive -framework SQLite.framework \

@@ -1,0 +1,152 @@
+name: Update
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: Check for new SQLite.swift version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+        
+      - id: check
+        run: |
+          UPSTREAM_VERSION=$(curl -s https://api.github.com/repos/stephencelis/SQLite.swift/releases/latest | grep tag_name | cut -d '"' -f 4)
+          echo "SQLite.swift version: $UPSTREAM_VERSION"
+
+          LOCAL_VERSION=$(git describe --tags --abbrev=0)
+          echo "SQLiteCipher version: $LOCAL_VERSION"
+
+          if [ $(echo "${UPSTREAM_VERSION}\n${LOCAL_VERSION}" | sort -V | head -1) == "${UPSTREAM_VERSION}" ]; then
+            echo "SQLite.swift version is not newer than current version"
+            exit
+          fi
+
+          echo "version=$UPSTREAM_VERSION" >> $GITHUB_OUTPUT
+
+  build:
+    name: Build SQLiteCipher
+    needs: check
+    if: needs.check.outputs.version
+    runs-on: macos-latest
+    outputs:
+      version: ${{ needs.check.outputs.version }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+        
+      - run: |
+          ./build.sh "${{ needs.check.outputs.version }}"
+        
+      - name: Upload SQLite.xcframework.zip
+        uses: actions/upload-artifact@v3
+        with:
+          name: sqlite
+          path: ./build/SQLite.xcframework.zip
+        
+      - name: Upload SQLCipher.xcframework.zip
+        uses: actions/upload-artifact@v3
+        with:
+          name: sqlcipher
+          path: ./build/SQLCipher.xcframework.zip
+
+  release:
+    name: Release SQLiteCipher
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download SQLite.xcframework.zip
+        uses: actions/download-artifact@v3
+        with:
+          name: sqlite
+
+      - name: Download SQLCipher.xcframework.zip
+        uses: actions/download-artifact@v3
+        with:
+          name: sqlcipher
+
+      - name: Update Package.swift
+        run: |
+          cat <<EOF > Package.swift
+          // swift-tools-version: 5.8
+          // The swift-tools-version declares the minimum version of Swift required to build this package.
+
+          import PackageDescription
+
+          let package = Package(
+            name: "SQLiteCipher",
+            platforms: [
+              .iOS(.v11),
+            ],
+            products: [
+              .library(name: "SQLiteCipher", targets: ["SQLite", "SQLCipher"]),
+            ],
+            targets: [
+              .binaryTarget(
+                name: "SQLite",
+                url: "https://github.com/zhuorantan/SQLiteCipher/releases/download/${{ needs.build.outputs.version }}/SQLite.xcframework.zip",
+                checksum: "$(shasum -a 256 ./SQLite.xcframework.zip | awk '{print $1}')"
+              ),
+
+              .binaryTarget(
+                name: "SQLCipher",
+                url: "https://github.com/zhuorantan/SQLiteCipher/releases/download/${{ needs.build.outputs.version }}/SQLCipher.xcframework.zip",
+                checksum: "$(shasum -a 256 ./SQLCipher.xcframework.zip | awk '{print $1}')"
+              ),
+            ]
+          )
+          EOF
+
+      - name: Commit
+        run: |
+          git config user.name 'GitHub'
+          git config user.email 'noreply@github.com'
+
+          git add Package.swift
+          git commit -m "Upgrade to ${{ needs.build.outputs.version }}"
+
+          git push
+
+      - name: Create a release
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+
+            const { data: release } = await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: '${{ needs.build.outputs.version }}',
+              tag_name: '${{ needs.build.outputs.version }}',
+              target_commitish: '${{ github.ref }}',
+              generate_release_notes: true,
+            });
+
+            await github.rest.repos.uploadReleaseAsset({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: release.id,
+              name: 'SQLite.xcframework.zip',
+              data: fs.readFileSync('./SQLite.xcframework.zip'),
+            });
+
+            await github.rest.repos.uploadReleaseAsset({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: release.id,
+              name: 'SQLCipher.xcframework.zip',
+              data: fs.readFileSync('./SQLCipher.xcframework.zip'),
+            });

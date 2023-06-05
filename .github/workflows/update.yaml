@@ -26,7 +26,7 @@ jobs:
           LOCAL_VERSION=$(git describe --tags --abbrev=0)
           echo "SQLiteCipher version: $LOCAL_VERSION"
 
-          if [ $(echo "${UPSTREAM_VERSION}\n${LOCAL_VERSION}" | sort -V | head -1) == "${UPSTREAM_VERSION}" ]; then
+          if [ $(echo -e "${UPSTREAM_VERSION}\n${LOCAL_VERSION}" | sort -V | head -1) == "${UPSTREAM_VERSION}" ]; then
             echo "SQLite.swift version is not newer than current version"
             exit
           fi

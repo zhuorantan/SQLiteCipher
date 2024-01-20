@@ -48,9 +48,24 @@ jobs:
         with:
           ruby-version: '3.0'
           bundler-cache: true
+
+      - name: Prepare
+        run: ./prepare.sh
+
+      - name: Build iOS
+        run: ./archive.sh "${{ needs.check.outputs.version }}" "iOS"
         
-      - run: |
-          ./build.sh "${{ needs.check.outputs.version }}"
+      - name: Build tvOS
+        run: ./archive.sh "${{ needs.check.outputs.version }}" "tvOS"
+        
+      - name: Build macOS
+        run: ./archive.sh "${{ needs.check.outputs.version }}" "macOS"
+        
+      - name: Build watchOS
+        run: ./archive.sh "${{ needs.check.outputs.version }}" "watchOS"
+        
+      - name: Create xcframework
+        run: ./create_xcframework.sh
         
       - name: Upload SQLite.xcframework.zip
         uses: actions/upload-artifact@v3

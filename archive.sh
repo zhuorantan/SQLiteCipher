@@ -38,7 +38,7 @@ install! 'cocoapods', :deterministic_uuids => false, :integrate_targets => false
 
 platform :$POD_PLATFORM
 
-pod 'SQLite.swift/SQLCipher', '$VERSION'
+pod 'SQLite.swift/SQLCipher', :git => 'https://github.com/stephencelis/SQLite.swift.git', :tag => '$VERSION'
 EOF
 
 bundle exec pod install

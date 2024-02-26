@@ -14,14 +14,14 @@ let package = Package(
   targets: [
     .binaryTarget(
       name: "SQLite",
-      url: "https://github.com/zhuorantan/SQLiteCipher/releases/download/0.14.1/SQLite.xcframework.zip",
-      checksum: "237d3462ed3e61883d9edefaa1dd7365cb6d06a1bab43580f6d8eefd850c3a98"
+      url: "https://github.com/zhuorantan/SQLiteCipher/releases/download/0.15.0/SQLite.xcframework.zip",
+      checksum: "817411fbe93d00edb6a9f6cec7f9b4792c13c8c10df73fba12f3dd83f8f58b40"
     ),
 
     .binaryTarget(
       name: "SQLCipher",
-      url: "https://github.com/zhuorantan/SQLiteCipher/releases/download/0.14.1/SQLCipher.xcframework.zip",
-      checksum: "8ccf0a590196e660a1250ea8d9f6ee05a7a38d9cf4afbd5f60ce431be3007034"
+      url: "https://github.com/zhuorantan/SQLiteCipher/releases/download/0.15.0/SQLCipher.xcframework.zip",
+      checksum: "9e3d0eaaeeddcb82b3a071b29d722f106037d696bf8ad4ed8e4bed89e25da9c7"
     ),
   ]
 )

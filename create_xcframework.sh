@@ -18,5 +18,5 @@ done < <(find . -type d -name "*SQLiteCipher-*.xcarchive" -print0)
 command "${SQLITE_COMMAND[@]}"
 command "${SQLCIPHER_COMMAND[@]}"
 
-zip -r SQLite.xcframework.zip SQLite.xcframework
-zip -r SQLCipher.xcframework.zip SQLCipher.xcframework
+ditto -c -k --sequesterRsrc --keepParent SQLite.xcframework SQLite.xcframework.zip
+ditto -c -k --sequesterRsrc --keepParent SQLCipher.xcframework SQLCipher.xcframework.zip

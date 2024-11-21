@@ -6,24 +6,28 @@ VERSION=$1
 PLATFORM=$2
 
 case $PLATFORM in
-  iOS)
-    POD_PLATFORM="ios, 17.0"
-    INCLUDES_SIMULATOR=true
-    ;;
-  tvOS)
-    POD_PLATFORM="tvos, 17.0"
-    INCLUDES_SIMULATOR=true
-    ;;
-  macOS)
-    POD_PLATFORM="macos, 14.0"
-    ;;
-  watchOS)
-    POD_PLATFORM="watchos, 10.0"
-    ;;
-  *)
-    echo "Unknown platform: $PLATFORM"
-    exit 1
-    ;;
+iOS)
+  POD_PLATFORM="ios, 17.0"
+  INCLUDES_SIMULATOR=true
+  ;;
+tvOS)
+  POD_PLATFORM="tvos, 17.0"
+  INCLUDES_SIMULATOR=true
+  ;;
+macOS)
+  POD_PLATFORM="macos, 14.0"
+  ;;
+macCatalyst)
+  POD_PLATFORM="ios, 17.0"
+  PLATFORM="macOS,variant=Mac Catalyst"
+  ;;
+watchOS)
+  POD_PLATFORM="watchos, 10.0"
+  ;;
+*)
+  echo "Unknown platform: $PLATFORM"
+  exit 1
+  ;;
 esac
 
 BUILD_DIR="./build/$PLATFORM"
@@ -31,7 +35,7 @@ rm -rf $BUILD_DIR
 mkdir -p $BUILD_DIR
 cd $BUILD_DIR
 
-cat <<EOF > Podfile
+cat <<EOF >Podfile
 use_frameworks!
 
 install! 'cocoapods', :deterministic_uuids => false, :integrate_targets => false
